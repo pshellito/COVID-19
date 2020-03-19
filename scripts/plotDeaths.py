@@ -12,10 +12,10 @@ dailyDataDir = '../csse_covid_19_data/csse_covid_19_daily_reports/'
 figDir = '../figures/'
 
 # Date to plot
-dateToPlot = dt.date(2020,3,17)
+dateToPlot = dt.date(2020,3,18)
 dateStr = dateToPlot.strftime('%m-%d-%Y')
 # Calculate change since
-oldDate = dt.date(2020,3,16)
+oldDate = dt.date(2020,3,17)
 oldDateStr = oldDate.strftime('%m-%d-%Y')
 
 # Current file name to plot
@@ -73,16 +73,18 @@ mapFig = plt.figure(figsize=(width, height))
 # Open axis
 ax = mapFig.gca()
 # Set up map projection with coastlines
-mm = Basemap(projection='cyl', llcrnrlat=minLat, urcrnrlat=maxLat, \
-        llcrnrlon=minLon, urcrnrlon=maxLon, resolution='l', lon_0=0) # Available 'c','l','i','h','f'
+# Try Albers Equal Area Projection?
+#mm = Basemap(projection='cyl', llcrnrlat=minLat, urcrnrlat=maxLat, \
+#        llcrnrlon=minLon, urcrnrlon=maxLon, resolution='l', lon_0=0) # Available 'c','l','i','h','f'
+mm = Basemap(projection='eck4', lon_0=0, resolution='l') # Available 'c','l','i','h','f'
 # Add country lines
-mm.drawcountries(color='darkgray', zorder=1)
+mm.drawcountries(color='darkgray', zorder=2)
 # Add state lines
-mm.drawstates(color='darkgray', zorder=1)
+mm.drawstates(color='darkgray', zorder=2)
 # Add coastlines
 mm.drawcoastlines(color='darkgray', zorder=1)
 # Fill continents
-mm.fillcontinents(color='lightgray', lake_color='lightsteelblue', zorder=0)
+mm.fillcontinents(color='lightgray', lake_color='lightsteelblue', zorder=1)
 # Fill oceans
 mm.drawmapboundary(fill_color='lightsteelblue')
 # Initialize Total deaths and Total new deaths
@@ -90,32 +92,42 @@ totDeaths = 0
 totNewDeaths = 0
 # Loop through locations to display
 for ii in range(0,len(idcsToPlot)):
+    # Extract coordinates of these data
     lon = newDf.iloc[idcsToPlot[ii]]['Longitude']
     lat = newDf.iloc[idcsToPlot[ii]]['Latitude']
+    # Convert lon and lat to x and y coordinates in the projection
+    xx, yy = mm(lon, lat)
+    # Extract the number of deaths and new deaths in this location
     deaths = newDf.iloc[idcsToPlot[ii]]['Deaths']
     newDeaths = newDf.loc[idcsToPlot[ii],'newDeaths']
+    # Scale if necessary
     scaledVal = deaths*markerScale
     if deaths > 0:
-        ax.scatter(lon, lat, s=deaths, marker='o', linewidth=2, facecolors='none', edgecolors='sienna', label='Deaths')
+        ax.scatter(xx, yy, s=deaths, marker='o', linewidth=2, facecolors='none', edgecolors='sienna', label='Deaths', zorder=3)
     if newDeaths > 0:
-        ax.scatter(lon, lat, s=newDeaths, marker='o', facecolors='r', edgecolors='none', label='New deaths')
-    if deaths > 0 and newDeaths > 0 and deaths!=newDeaths:
+        ax.scatter(xx, yy, s=newDeaths, marker='o', facecolors='r', edgecolors='none', label='New deaths', zorder=3)
+    if deaths > 10 and newDeaths > 0 and deaths!=newDeaths:
         textStr = str(deaths) + ' (' + str(newDeaths) + ')'
-    elif newDeaths > 0:
+    elif newDeaths > 2:
         textStr = '(' + str(newDeaths) + ')'
-    elif deaths > 0:
+    elif deaths > 10:
         textStr = str(deaths)
     else:
         textStr = ''
-    ax.text(lon,lat, textStr)
+    ax.text(xx, yy, textStr)
     totDeaths += deaths
     totNewDeaths += newDeaths
 
 plt.title(str(totDeaths) + ' COVID-19 deaths as of ' + dateStr + ' (' + str(totNewDeaths) + ' new since ' + oldDateStr +') Source: Johns Hopkins')
+# Create dummy scatter items for the legend
+lxx, lyy = mm(-99,-99)
+ss1 = ax.scatter(lxx, lyy, s=100, marker='o', linewidth=2, facecolors='none', edgecolors='sienna', zorder=-1)
+ss2 = ax.scatter(lxx, lyy, s=50, marker='o', facecolors='r', edgecolors='none', zorder=-1)
 # Add legend
-ss1 = ax.scatter(0, 20, s=100, marker='o', linewidth=2, facecolors='none', edgecolors='sienna', zorder=-1)
-ss2 = ax.scatter(0, 20, s=50, marker='o', facecolors='r', edgecolors='none', zorder=-1)
 ax.legend((ss1, ss2),('Deaths to-date', '(New deaths)'), loc='upper left')
+# Add github source
+txx, tyy = mm(0,-87)
+ax.text(txx, tyy, 'https://github.com/pshellito/COVID-19/tree/deathFigures', ha = 'center', va='bottom')
 # Print the figure
 figName = figDir + dateStr + '_covid19deaths.png'
 print('Printing ' + figName + '...')
