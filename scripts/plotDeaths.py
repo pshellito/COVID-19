@@ -12,10 +12,10 @@ dailyDataDir = '../csse_covid_19_data/csse_covid_19_daily_reports/'
 figDir = '../figures/'
 
 # Date to plot
-dateToPlot = dt.date(2020,3,18)
+dateToPlot = dt.date(2020,3,19)
 dateStr = dateToPlot.strftime('%m-%d-%Y')
 # Calculate change since
-oldDate = dt.date(2020,3,17)
+oldDate = dateToPlot - dt.timedelta(days=1)
 oldDateStr = oldDate.strftime('%m-%d-%Y')
 
 # Current file name to plot
@@ -118,7 +118,7 @@ for ii in range(0,len(idcsToPlot)):
     totDeaths += deaths
     totNewDeaths += newDeaths
 
-plt.title(str(totDeaths) + ' COVID-19 deaths as of ' + dateStr + ' (' + str(totNewDeaths) + ' new since ' + oldDateStr +') Source: Johns Hopkins')
+plt.title(str(totDeaths) + ' COVID-19 deaths as of ' + dateStr + ' (' + str(totNewDeaths) + ' new since ' + oldDateStr +') Source: Johns Hopkins University')
 # Create dummy scatter items for the legend
 lxx, lyy = mm(-99,-99)
 ss1 = ax.scatter(lxx, lyy, s=100, marker='o', linewidth=2, facecolors='none', edgecolors='sienna', zorder=-1)
