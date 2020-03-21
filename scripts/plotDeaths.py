@@ -12,17 +12,10 @@ dailyDataDir = '../csse_covid_19_data/csse_covid_19_daily_reports/'
 figDir = '../figures/'
 
 # Date to plot
-<<<<<<< HEAD
-dateToPlot = dt.date(2020,3,18)
+dateToPlot = dt.date(2020,3,20)
 dateStr = dateToPlot.strftime('%m-%d-%Y')
-# Calculate change since
-oldDate = dt.date(2020,3,17)
-=======
-dateToPlot = dt.date(2020,3,19)
-dateStr = dateToPlot.strftime('%m-%d-%Y')
-# Calculate change since
+# Calculate old date time
 oldDate = dateToPlot - dt.timedelta(days=1)
->>>>>>> a6ffa111e21d4114367bc3f6e844171364a2c606
 oldDateStr = oldDate.strftime('%m-%d-%Y')
 
 # Current file name to plot
