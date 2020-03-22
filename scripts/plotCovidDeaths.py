@@ -8,14 +8,11 @@ from mpl_toolkits.basemap import Basemap
 from deathPlotUtils import plotRegion
 
 
-# Region to plot
-region = 'northAmerica'
-region = 'middleEast'
-region = 'eastAsia'
-region = 'globe'
-region = 'europe'
+# Regions to plot
+regionList = ['globe', 'northAmerica', 'europe', 'middleEast', 'eastAsia']
 # Date to plot
-dateToPlot = dt.date(2020,3,21)
+dateToPlot = dt.date(2020,3,15)
 
-figName = plotRegion(dateToPlot, region='northAmerica')
+for thisRegion in regionList:
+    figName = plotRegion(dateToPlot, region=thisRegion)
 
