@@ -11,7 +11,7 @@ from deathPlotUtils import plotRegion
 # Regions to plot
 regionList = ['globe', 'northAmerica', 'europe', 'middleEast', 'eastAsia']
 # Date to plot
-dateToPlot = dt.date(2020,3,15)
+dateToPlot = dt.date(2020,3,22)
 
 for thisRegion in regionList:
     figName = plotRegion(dateToPlot, region=thisRegion)
