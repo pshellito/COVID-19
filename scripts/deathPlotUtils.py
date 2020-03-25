@@ -7,15 +7,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
 
-# Region to plot
-region = 'northAmerica'
-region = 'middleEast'
-region = 'eastAsia'
-region = 'globe'
-region = 'europe'
-# Date to plot
-dateToPlot = dt.date(2020,3,21)
-
 # This script contains a function to plot COVID-19 deaths
 def plotRegion(dateToPlot, region='globe', dailyDataDir='../csse_covid_19_data/csse_covid_19_daily_reports/', figDir='../figures/'):
     # Directory holding daily reports
