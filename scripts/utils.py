@@ -2,10 +2,68 @@
 # good site for basic map stuff: https://github.com/matplotlib/matplotlib/issues/11596
 # Data source: https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports
 import datetime as dt
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 
+# This script reads the csv files
+def readData(dnToRead, roundTo=3):
+    # Returns pandas dataFrame with columns: lonLatKey, name, county, state, country, lon, lat, confirmed, deaths, recovered, active
+    # Define some parameters that aren't likely to change
+    # Directory holding daily reports
+    dailyDataDir='../csse_covid_19_data/csse_covid_19_daily_reports/'
+    # Directory in which to place figures
+    figDir='../figures/'
+    # File datestring
+    dateStr = dnToRead.strftime('%m-%d-%Y')
+    # File name to read
+    fn = dailyDataDir + dateStr + '.csv'
+    # Select old or new reader
+    if dnToRead > dt.date(2020,3,21):
+        dataFrame = read322Data(fn, roundTo)
+    else:
+        dataFrame = readOldData(fn, roundTo)
+    return dataFrame 
+
+# This script reads the old csv files
+def readOldData(fn, roundTo):
+    # Import all data
+    allDf = pd.read_csv(fn)
+    # Rename some columns
+    allDf = allDf.rename({'Province/State': 'state', 'Country/Region': 'country', 'Last Update': 'lastUpdate', 'Latitude': 'lat', 'Longitude': 'lon'}, axis='columns')
+    # Create an empty column for county
+    allDf['county'] = np.nan
+
+    # calculate the number of active cases
+    allDf['Active'] = allDf['Confirmed']  - allDf[['Deaths','Recovered']].sum(axis=1)
+    # Create a lonLatKey (string of concatenated rounded lon lat)
+    allDf['lonLatKey'] = allDf['lon'].round(roundTo).astype(str) + \
+                         allDf['lat'].round(roundTo).astype(str)
+    # Save the most granular name (county, state, or country) in the "name" column
+    countyIsEmpty = allDf['county'].isna()
+    countyIsEmpty.rename('aie', inplace=True)#, axis='columns')
+    stateIsEmpty = allDf['state'].isna()
+    stateIsEmpty.rename('bie', inplace=True)#, axis='columns')
+    countryIsEmpty = allDf['country'].isna()
+    countryIsEmpty.rename('cie', inplace=True)#, axis='columns')
+    county = allDf['county']
+    state  = allDf['state']
+    country = allDf['country']
+    nameIndex = pd.concat([countyIsEmpty, stateIsEmpty, countryIsEmpty, county, state, country], axis=1)
+    for index, row in nameIndex.iterrows():
+        if row['aie']:
+            if row['bie']:
+                name = row['country']
+            else:
+                name = row['state']
+        else:
+            name = row['county']
+        allDf.loc[index,'name'] = name
+    return allDf 
+
+# START HERE
+# Create a function to read the new data
 
 # This script contains a function to plot COVID-19 deaths
 def plotRegion(dateToPlot, region='globe', dailyDataDir='../csse_covid_19_data/csse_covid_19_daily_reports/', figDir='../figures/'):
